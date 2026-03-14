@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduNest | My Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Design System Tokens */
+            --bg: #0c0e14;
+            --surface: #13161f;
+            --surface2: #1a1e2a;
+            --accent: #6c63ff;
+            --accent-glow: rgba(108, 99, 255, 0.2);
+            --green: #2dd4a0;
+            --amber: #f5a623;
+            --red: #ff5f6d;
+            --text-main: #ffffff;
+            --text-muted: #8b949e;
+            --border: rgba(255, 255, 255, 0.07);
+            --border-hover: rgba(255, 255, 255, 0.14);
+
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+
+            --radius-card: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .display-font {
+            font-family: var(--font-display);
+        }
+
+        /* Sidebar - Same as Dashboard */
+        .sidebar {
+            width: 260px;
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 800;
+            font-family: var(--font-display);
+            margin-bottom: 40px;
+            padding: 0 8px;
+        }
+
+        .logo svg {
+            color: var(--accent);
+        }
+
+        .nav-section {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 24px 0 8px 8px;
+            font-weight: 700;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            color: var(--text-main);
+            background: var(--surface2);
+        }
+
+        .nav-item.active {
+            color: var(--text-main);
+            background: rgba(108, 99, 255, 0.1);
+            position: relative;
+        }
+
+        .nav-item.primary-cta {
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .nav-item.primary-cta:hover {
+            border-color: var(--accent);
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 20px;
+            width: 3px;
+            background: var(--accent);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .user-profile {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Icons setup */
+        svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 48px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            background: #5a52d9;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-ghost:hover {
+            background: var(--surface2);
+            border-color: var(--border-hover);
+        }
+
+        .btn-danger {
+            background: rgba(255, 95, 109, 0.1);
+            color: var(--red);
+            border-color: rgba(255, 95, 109, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 95, 109, 0.2);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 0;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+        }
+
+        .tab.active {
+            color: var(--text-main);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .tab-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface2);
+            color: var(--text-muted);
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .tab.active .tab-count {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border-color: transparent;
+        }
+
+        /* Bulk Actions */
+        .bulk-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+        }
+
+        .bulk-actions.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .bulk-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .bulk-info span {
+            color: var(--accent);
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th,
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: var(--surface2);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Checkbox */
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .checkbox.checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .checkbox.checked::after {
+            content: '';
+            width: 5px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-bottom: 2px;
+        }
+
+        /* Table Content */
+        .note-title-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-icon.pdf {
+            background: rgba(255, 95, 109, 0.1);
+            color: var(--red);
+        }
+
+        .file-icon.docx {
+            background: rgba(45, 212, 160, 0.1);
+            color: var(--green);
+        }
+
+        .note-info h4 {
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .note-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .subject-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .date-cell {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .downloads-cell {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .downloads-cell svg {
+            width: 14px;
+            height: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-badge.published {
+            background: rgba(45, 212, 160, 0.1);
+            color: var(--green);
+        }
+
+        .status-badge.published::before {
+            background: var(--green);
+        }
+
+        .status-badge.draft {
+            background: rgba(245, 166, 35, 0.1);
+            color: var(--amber);
+        }
+
+        .status-badge.draft::before {
+            background: var(--amber);
+        }
+
+        .status-badge.archived {
+            background: var(--surface2);
+            color: var(--text-muted);
+        }
+
+        .status-badge.archived::before {
+            background: var(--text-muted);
+        }
+
+        /* Row Actions */
+        .row-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        tr:hover .row-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--surface2);
+            border-color: var(--border-hover);
+            color: var(--text-main);
+        }
+
+        .action-btn.delete:hover {
+            background: rgba(255, 95, 109, 0.1);
+            border-color: rgba(255, 95, 109, 0.2);
+            color: var(--red);
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            background: var(--surface);
+            border: 1px dashed var(--border-hover);
+            border-radius: var(--radius-card);
+            margin-top: 24px;
+        }
+
+        .empty-state.visible {
+            display: flex;
+        }
+
+        .empty-illustration {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 24px;
+            opacity: 0.8;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-display);
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            max-width: 400px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            EduNest
+        </div>
+
+        <div class="nav-section">Main</div>
+        <a class="nav-item">
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="9"></rect>
+                <rect x="14" y="3" width="7" height="5"></rect>
+                <rect x="14" y="12" width="7" height="9"></rect>
+                <rect x="3" y="16" width="7" height="5"></rect>
+            </svg>
+            Dashboard
+        </a>
+        <a class="nav-item">
+            <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Browse
+        </a>
+
+        <div class="nav-section">Library</div>
+        <a class="nav-item active">
+            <svg viewBox="0 0 24 24">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            My Library
+        </a>
+        <a class="nav-item primary-cta">
+            <svg viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload
+        </a>
+
+        <div class="nav-section">Account</div>
+        <a class="nav-item">
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                </path>
+            </svg>
+            Settings
+        </a>
+
+        <div class="user-profile">
+            <div class="avatar">S</div>
+            <div style="flex: 1; min-width: 0;">
+                <div
+                    style="font-size: 13px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    Sathyam</div>
+                <div
+                    style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    Computer Science</div>
+            </div>
+            <svg viewBox="0 0 24 24" style="color: var(--text-muted);">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <div>
+                <h1 class="display-font">My Library</h1>
+                <p>Manage your uploaded notes and drafts.</p>
+            </div>
+            <button class="btn btn-primary">
+                <svg viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Upload New
+            </button>
+        </div>
+
+        <div class="tabs" id="library-tabs">
+            <div class="tab active" data-filter="all">All <span class="tab-count" id="count-all">3</span></div>
+            <div class="tab" data-filter="published">Published <span class="tab-count" id="count-pub">2</span></div>
+            <div class="tab" data-filter="draft">Drafts <span class="tab-count" id="count-draft">1</span></div>
+            <div class="tab" data-filter="archived">Archived <span class="tab-count" id="count-arch">0</span></div>
+        </div>
+
+        <div class="bulk-actions" id="bulk-actions-bar">
+            <div class="bulk-info">
+                <span id="selected-count">2 selected</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 13px;"
+                    id="btn-cancel-select">Cancel</button>
+                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 13px;" id="btn-bulk-delete">
+                    <svg viewBox="0 0 24 24">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Delete Selected
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container" id="table-view">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 48px;">
+                            <div class="checkbox" id="selectAll"></div>
+                        </th>
+                        <th>Title</th>
+                        <th>Subject</th>
+                        <th>Uploaded Date</th>
+                        <th>Downloads</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Row 1 -->
+                    <tr data-status="published" class="note-row">
+                        <td>
+                            <div class="checkbox row-checkbox"></div>
+                        </td>
+                        <td>
+                            <div class="note-title-cell">
+                                <div class="file-icon pdf">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="note-info">
+                                    <h4>Operating Systems Ch 4</h4>
+                                    <p>PDF • 2.4 MB</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="subject-tag">Computer Science</span></td>
+                        <td class="date-cell">Oct 24, 2023</td>
+                        <td>
+                            <div class="downloads-cell">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                142
+                            </div>
+                        </td>
+                        <td><span class="status-badge published">Published</span></td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="action-btn" title="Toggle Visibility">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" title="Edit">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" title="Delete">
+                                    <svg viewBox="0 0 24 24">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 2 -->
+                    <tr data-status="published" class="note-row">
+                        <td>
+                            <div class="checkbox row-checkbox"></div>
+                        </td>
+                        <td>
+                            <div class="note-title-cell">
+                                <div class="file-icon docx">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="note-info">
+                                    <h4>Data Structures Midterm Review</h4>
+                                    <p>DOCX • 1.1 MB</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="subject-tag">Computer Science</span></td>
+                        <td class="date-cell">Oct 20, 2023</td>
+                        <td>
+                            <div class="downloads-cell">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                305
+                            </div>
+                        </td>
+                        <td><span class="status-badge published">Published</span></td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="action-btn" title="Toggle Visibility">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" title="Edit">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" title="Delete">
+                                    <svg viewBox="0 0 24 24">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 3 -->
+                    <tr data-status="draft" class="note-row">
+                        <td>
+                            <div class="checkbox row-checkbox"></div>
+                        </td>
+                        <td>
+                            <div class="note-title-cell">
+                                <div class="file-icon pdf">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="note-info">
+                                    <h4>Machine Learning Notes Part 1</h4>
+                                    <p>PDF • 4.5 MB</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="subject-tag">AI / ML</span></td>
+                        <td class="date-cell">Today</td>
+                        <td>
+                            <div class="downloads-cell" style="color: var(--text-muted); opacity: 0.5;">
+                                -
+                            </div>
+                        </td>
+                        <td><span class="status-badge draft">Draft</span></td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="action-btn" title="Publish">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" title="Edit">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" title="Delete">
+                                    <svg viewBox="0 0 24 24">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state">
+            <svg class="empty-illustration" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1" fill="none">
+                <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="M2 15h10M6 11l-4 4 4 4"></path>
+            </svg>
+            <h3 class="display-font">Nothing here yet</h3>
+            <p>You haven't uploaded any notes matching this status. Share your first document to help the community.</p>
+            <button class="btn btn-primary" onclick="alert('Navigate to Upload page')">
+                <svg viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Upload Now
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab');
+            const rows = document.querySelectorAll('.note-row');
+            const tableView = document.getElementById('table-view');
+            const emptyState = document.getElementById('empty-state');
+
+            const selectAllBtn = document.getElementById('selectAll');
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            const bulkActionsBar = document.getElementById('bulk-actions-bar');
+            const selectedCountDisplay = document.getElementById('selected-count');
+            const btnCancelSelect = document.getElementById('btn-cancel-select');
+            const btnBulkDelete = document.getElementById('btn-bulk-delete');
+
+            let selectedCount = 0;
+
+            // Update Tab Counts
+            function updateCounts() {
+                const totalRows = document.querySelectorAll('.note-row').length;
+                const pubRows = document.querySelectorAll('.note-row[data-status="published"]').length;
+                const draftRows = document.querySelectorAll('.note-row[data-status="draft"]').length;
+                const archRows = document.querySelectorAll('.note-row[data-status="archived"]').length;
+
+                document.getElementById('count-all').textContent = totalRows;
+                document.getElementById('count-pub').textContent = pubRows;
+                document.getElementById('count-draft').textContent = draftRows;
+                document.getElementById('count-arch').textContent = archRows;
+            }
+            updateCounts();
+
+            // Tab Navigation Logic
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Reset active state
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // Filter logic
+                    const filter = tab.dataset.filter;
+                    let visibleCount = 0;
+
+                    rows.forEach(row => {
+                        if (filter === 'all' || row.dataset.status === filter) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Handle Empty State
+                    if (visibleCount === 0) {
+                        tableView.style.display = 'none';
+                        emptyState.classList.add('visible');
+                    } else {
+                        tableView.style.display = 'block';
+                        emptyState.classList.remove('visible');
+                    }
+
+                    // Reset selection when changing tabs
+                    clearSelection();
+                });
+            });
+
+            // Selection Logic
+            function updateBulkBar() {
+                if (selectedCount > 0) {
+                    bulkActionsBar.classList.add('visible');
+                    selectedCountDisplay.textContent = `${selectedCount} selected`;
+                } else {
+                    bulkActionsBar.classList.remove('visible');
+                    selectAllBtn.classList.remove('checked');
+                }
+            }
+
+            function clearSelection() {
+                rowCheckboxes.forEach(cb => {
+                    cb.classList.remove('checked');
+                    cb.closest('tr').style.backgroundColor = '';
+                });
+                selectAllBtn.classList.remove('checked');
+                selectedCount = 0;
+                updateBulkBar();
+            }
+
+            // Individual checkboxes
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const tr = checkbox.closest('tr');
+
+                    if (checkbox.classList.contains('checked')) {
+                        checkbox.classList.remove('checked');
+                        tr.style.backgroundColor = '';
+                        selectedCount--;
+                        selectAllBtn.classList.remove('checked');
+                    } else {
+                        checkbox.classList.add('checked');
+                        tr.style.backgroundColor = 'rgba(108, 99, 255, 0.05)';
+                        selectedCount++;
+
+                        // Check if all visible rows are selected
+                        const visibleRows = Array.from(rows).filter(r => r.style.display !== 'none');
+                        const selectedVisible = visibleRows.filter(r => r.querySelector('.checkbox').classList.contains('checked')).length;
+                        if (selectedVisible === visibleRows.length && visibleRows.length > 0) {
+                            selectAllBtn.classList.add('checked');
+                        }
+                    }
+                    updateBulkBar();
+                });
+            });
+
+            // Select All checkbox
+            selectAllBtn.addEventListener('click', () => {
+                const isChecked = selectAllBtn.classList.contains('checked');
+                const visibleRows = Array.from(rows).filter(r => r.style.display !== 'none');
+
+                if (isChecked) {
+                    // Deselect all
+                    clearSelection();
+                } else {
+                    // Select all visible
+                    selectAllBtn.classList.add('checked');
+                    selectedCount = 0;
+
+                    rowCheckboxes.forEach(cb => {
+                        const tr = cb.closest('tr');
+                        if (tr.style.display !== 'none') {
+                            cb.classList.add('checked');
+                            tr.style.backgroundColor = 'rgba(108, 99, 255, 0.05)';
+                            selectedCount++;
+                        }
+                    });
+                    updateBulkBar();
+                }
+            });
+
+            // Cancel button
+            btnCancelSelect.addEventListener('click', clearSelection);
+
+            // Bulk Delete
+            btnBulkDelete.addEventListener('click', () => {
+                if (confirm(`Are you sure you want to delete ${selectedCount} selected items?`)) {
+                    // In a real app, this would be an API call
+                    const checkedRows = Array.from(rowCheckboxes)
+                        .filter(cb => cb.classList.contains('checked'))
+                        .map(cb => cb.closest('tr'));
+
+                    checkedRows.forEach(row => row.remove());
+
+                    clearSelection();
+                    updateCounts();
+
+                    // Simulate clicking active tab to refresh empty state logic
+                    document.querySelector('.tab.active').click();
+                }
+            });
+
+            // Individual Delete Buttons
+            document.querySelectorAll('.action-btn.delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this specific note?')) {
+                        btn.closest('tr').remove();
+                        updateCounts();
+                        // Refresh state
+                        document.querySelector('.tab.active').click();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

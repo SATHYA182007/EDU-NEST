@@ -1,0 +1,309 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --background: #0d0f14;
+  --surface: #13161e;
+  --surface-2: #1a1e28;
+  --text-main: #e8ecf4;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
+  --primary: #4f8ef7;
+  --primary-hover: #3b82f6;
+  --secondary: #a78bfa;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --font-sora: 'Sora', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root.light {
+  --background: #f0f2f7;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --text-main: #111827;
+  --text-muted: #64748b;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.15);
+  --primary: #4f8ef7;
+  --secondary: #a78bfa;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+
+  --font-sora: var(--font-sora);
+  --font-inter: var(--font-inter);
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--text-main);
+    font-family: var(--font-inter);
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-heading {
+    font-family: var(--font-sora);
+    font-weight: 700;
+  }
+}
+
+@layer components {
+
+  /* Cards */
+  .card-premium {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .card-premium:hover {
+    border-color: var(--color-border-hover);
+  }
+
+  .note-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .note-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  /* Stat Cards */
+  .stat-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    background: var(--color-primary);
+    filter: blur(40px);
+    border-radius: 50%;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-sora);
+    font-size: 0.9rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(79, 142, 247, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 142, 247, 0.4);
+    filter: brightness(1.1);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--border-hover);
+    background-color: var(--surface-2);
+  }
+
+  .btn-ghost:active {
+    transform: scale(0.97);
+  }
+
+  .btn-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .btn-danger:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+  }
+
+  /* Inputs */
+  .input-field {
+    width: 100%;
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--color-text-main);
+    outline: none;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+  }
+
+  .input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+  }
+
+  .input-field::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  /* Sidebar */
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: var(--color-text-muted);
+    transition: all 0.2s;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+    position: relative;
+  }
+
+  .sidebar-item:hover {
+    color: var(--color-text-main);
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+
+  .sidebar-item-active {
+    background-color: rgba(79, 142, 247, 0.1);
+    color: var(--primary);
+  }
+
+  .sidebar-item-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 50%;
+    width: 3px;
+    background-color: var(--primary);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .logo-edunest {
+    font-family: var(--font-sora);
+    font-weight: 800;
+  }
+
+  .logo-edu {
+    color: var(--text-main);
+  }
+
+  .logo-nest {
+    color: var(--primary);
+  }
+
+  /* Tags/Badges */
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: var(--color-surface-2);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+  }
+
+  .file-type-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-pdf {
+    background-color: rgba(255, 95, 109, 0.1);
+    color: var(--color-danger);
+  }
+
+  .badge-docx {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+  }
+
+  .badge-ppt {
+    background-color: rgba(245, 166, 35, 0.1);
+    color: var(--color-warning);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
