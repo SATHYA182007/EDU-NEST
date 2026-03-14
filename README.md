@@ -27,3 +27,4 @@ EduNest is a collaborative student learning platform that enables users to share
 - **/frontend-old**: Backup of the original project.
 - **/backend**: Server logic for file handling and database.
 - **index.html**: The production-ready entry point for your new website.
+# EDU-NEST
