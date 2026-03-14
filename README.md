@@ -1,17 +1,9 @@
-# EduNest - Student Notes Sharing Platform
+# EduNest
+EduNest is a collaborative student learning platform that enables users to share and access study materials, take quizzes, rate educational content, and enhance learning through videos in a structured environment.
 
-This project has been redesigned into a professional, high-end SaaS platform.
+## 🚀 Getting Started
 
-## 🚀 Accessing the Redesign
-
-### **1. Opening the Ready-to-Use Website**
-The finalized, built version of the website is located in the root directory. You can access it immediately by opening:
-👉 `index.html` (in the root directory)
-
-### **2. Development Mode (For Future Edits)**
-If you want to continue editing the code using the modern React + Tailwind system, follow these steps:
-
-1. **Open your terminal** and go to the frontend directory:
+1. **Navigate to the frontend directory**:
    ```bash
    cd frontend
    ```
