@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Shield, Bell, AlertTriangle, Upload, CheckCircle2, X } from "lucide-react";
+import { User, Shield, Bell, AlertTriangle, Upload, CheckCircle2, X, Search } from "lucide-react";
 
 export default function SettingsPage({ user }) {
     const [activeTab, setActiveTab] = useState("profile");
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Scholar";
     const avatarLetter = displayName[0]?.toUpperCase() || "U";
@@ -30,14 +31,26 @@ export default function SettingsPage({ user }) {
         <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-background relative z-10">
             {/* Header/Title hidden on desktop since sidebar covers it conceptually */}
             <div className="md:hidden p-6 border-b border-border bg-surface shrink-0">
-                <h1 className="text-2xl font-heading font-extrabold text-white">Settings</h1>
+                <h1 className="text-2xl font-heading font-extrabold text-text-main">Settings</h1>
             </div>
 
             {/* Left Tabs Menu */}
-            <div className="w-full md:w-64 border-r border-border bg-surface shrink-0 p-6 overflow-y-auto">
-                <h2 className="hidden md:block text-2xl font-heading font-extrabold text-white mb-8 tracking-tight">Settings</h2>
+            <div className="w-full md:w-72 border-r border-border bg-surface shrink-0 p-6 overflow-y-auto">
+                <h2 className="hidden md:block text-2xl font-heading font-extrabold text-text-main mb-8 tracking-tight">Settings</h2>
+                
+                <div className="relative mb-6 group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
+                    <input 
+                        type="text"
+                        placeholder="Search settings..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-surface-2 border border-border rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                </div>
+
                 <nav className="space-y-2 flex flex-row md:flex-col overflow-x-auto md:overflow-visible pb-4 md:pb-0 scroll-smooth">
-                    {tabs.map(tab => {
+                    {tabs.filter(t => t.label.toLowerCase().includes(searchQuery.toLowerCase())).map(tab => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
                         return (
@@ -46,7 +59,7 @@ export default function SettingsPage({ user }) {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-sm transition-all whitespace-nowrap ${isActive
                                     ? tab.danger ? 'bg-danger/10 text-danger border border-danger/20' : 'bg-primary/10 text-primary border border-primary/20 shadow-[0_0_10px_rgba(108,99,255,0.1)]'
-                                    : 'text-text-muted hover:bg-surface-2 hover:text-white border border-transparent'
+                                    : 'text-text-muted hover:bg-surface-2 hover:text-text-main border border-transparent'
                                     }`}
                             >
                                 <Icon className="w-5 h-5 shrink-0" />
@@ -72,7 +85,7 @@ export default function SettingsPage({ user }) {
                                 className="space-y-8"
                             >
                                 <div className="border-b border-border pb-6">
-                                    <h3 className="text-xl font-heading font-bold text-white mb-2">Public Profile</h3>
+                                    <h3 className="text-xl font-heading font-bold text-text-main mb-2">Public Profile</h3>
                                     <p className="text-text-muted text-sm">Manage how others see you on the platform.</p>
                                 </div>
 
@@ -123,7 +136,7 @@ export default function SettingsPage({ user }) {
                                 className="space-y-8"
                             >
                                 <div className="border-b border-border pb-6">
-                                    <h3 className="text-xl font-heading font-bold text-white mb-2">Account Security</h3>
+                                    <h3 className="text-xl font-heading font-bold text-text-main mb-2">Account Security</h3>
                                     <p className="text-text-muted text-sm">Manage your login credentials and security settings.</p>
                                 </div>
 
@@ -169,14 +182,14 @@ export default function SettingsPage({ user }) {
                                 className="space-y-8"
                             >
                                 <div className="border-b border-border pb-6">
-                                    <h3 className="text-xl font-heading font-bold text-white mb-2">Notification Preferences</h3>
+                                    <h3 className="text-xl font-heading font-bold text-text-main mb-2">Notification Preferences</h3>
                                     <p className="text-text-muted text-sm">Control how and when you want to be notified.</p>
                                 </div>
 
                                 <div className="space-y-6">
                                     <div className="flex items-start justify-between gap-4 p-4 border border-border rounded-xl hover:bg-surface-2 transition-colors">
                                         <div>
-                                            <h4 className="font-bold text-white mb-1">Important Account Alerts</h4>
+                                            <h4 className="font-bold text-text-main mb-1">Important Account Alerts</h4>
                                             <p className="text-sm text-text-muted">Security updates, terms changes. Cannot be disabled.</p>
                                         </div>
                                         <ToggleSwitch checked={true} onChange={() => { }} />
@@ -184,7 +197,7 @@ export default function SettingsPage({ user }) {
 
                                     <div className="flex items-start justify-between gap-4 p-4 border border-border rounded-xl hover:bg-surface-2 transition-colors">
                                         <div>
-                                            <h4 className="font-bold text-white mb-1">Download Notifications</h4>
+                                            <h4 className="font-bold text-text-main mb-1">Download Notifications</h4>
                                             <p className="text-sm text-text-muted">Get alerted when someone downloads your notes.</p>
                                         </div>
                                         <ToggleSwitch checked={true} onChange={() => { }} />
@@ -192,7 +205,7 @@ export default function SettingsPage({ user }) {
 
                                     <div className="flex items-start justify-between gap-4 p-4 border border-border rounded-xl hover:bg-surface-2 transition-colors">
                                         <div>
-                                            <h4 className="font-bold text-white mb-1">Weekly Digest</h4>
+                                            <h4 className="font-bold text-text-main mb-1">Weekly Digest</h4>
                                             <p className="text-sm text-text-muted">An email summary of your account's weekly performance.</p>
                                         </div>
                                         <ToggleSwitch checked={false} onChange={() => { }} />
@@ -200,7 +213,7 @@ export default function SettingsPage({ user }) {
 
                                     <div className="flex items-start justify-between gap-4 p-4 border border-border rounded-xl hover:bg-surface-2 transition-colors">
                                         <div>
-                                            <h4 className="font-bold text-white mb-1">New Features & Promotions</h4>
+                                            <h4 className="font-bold text-text-main mb-1">New Features & Promotions</h4>
                                             <p className="text-sm text-text-muted">Updates about new platform features.</p>
                                         </div>
                                         <ToggleSwitch checked={false} onChange={() => { }} />
@@ -231,7 +244,7 @@ export default function SettingsPage({ user }) {
 
                                 <div className="border border-border p-6 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-danger/50 transition-colors bg-surface-2">
                                     <div>
-                                        <h4 className="font-bold text-white mb-1">Delete Account</h4>
+                                        <h4 className="font-bold text-text-main mb-1">Delete Account</h4>
                                         <p className="text-sm text-text-muted">Permanently erase your account, uploaded notes, and all data.</p>
                                     </div>
                                     <button
@@ -262,7 +275,7 @@ export default function SettingsPage({ user }) {
                             exit={{ scale: 0.95, opacity: 0 }}
                             className="bg-surface border border-border rounded-2xl p-6 max-w-sm w-full relative shadow-2xl"
                         >
-                            <button className="absolute top-4 right-4 text-text-muted hover:text-white" onClick={() => setIsDeleteModalOpen(false)}>
+                            <button className="absolute top-4 right-4 text-text-muted hover:text-text-main" onClick={() => setIsDeleteModalOpen(false)}>
                                 <X className="w-5 h-5" />
                             </button>
 
@@ -270,7 +283,7 @@ export default function SettingsPage({ user }) {
                                 <AlertTriangle className="w-6 h-6" />
                             </div>
 
-                            <h3 className="text-xl font-heading font-bold text-white mb-2">Delete Account?</h3>
+                            <h3 className="text-xl font-heading font-bold text-text-main mb-2">Delete Account?</h3>
                             <p className="text-text-muted text-sm mb-6">
                                 Are you absolutely sure? This action cannot be undone. This will permanently delete your account and remove your study materials from our servers.
                             </p>

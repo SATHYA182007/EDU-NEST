@@ -42,7 +42,7 @@ export default function Hero({ onBrowse, onUpload, onLogin }) {
                     </h1>
 
                     <p className="text-xl text-text-muted mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
-                        Join Sathya M and over 10,000 students sharing high-quality study materials,
+                        Join thousands of students sharing high-quality study materials,
                         lecture notes, and exam cheat sheets.
                     </p>
 

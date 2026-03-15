@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getForumQuestions, getForumAnswers, askForumQuestion, answerForumQuestion } from '../services/forumService';
-import { MessageSquare, Send, User, ChevronRight, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, User, ChevronRight, Loader2, Search } from 'lucide-react';
 
 export default function DiscussionSection({ user }) {
     const [questions, setQuestions] = useState([]);
@@ -10,6 +10,12 @@ export default function DiscussionSection({ user }) {
     const [newQuestionDesc, setNewQuestionDesc] = useState('');
     const [newAnswer, setNewAnswer] = useState('');
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const filteredQuestions = questions.filter(q => 
+        q.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        q.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     useEffect(() => {
         fetchQuestions();
@@ -127,9 +133,22 @@ export default function DiscussionSection({ user }) {
         <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">
             <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 flex flex-col gap-6">
-                    <h2 className="text-2xl font-bold font-sora mb-2">Student Discussion</h2>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <h2 className="text-2xl font-bold font-sora">Student Discussion</h2>
+                        <div className="relative flex-1 max-w-sm group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
+                            <input 
+                                type="text"
+                                placeholder="Search discussions..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-surface-2 border border-border rounded-2xl py-2.5 pl-11 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            />
+                        </div>
+                    </div>
+
                     <div className="space-y-4">
-                        {questions.map(q => (
+                        {filteredQuestions.map(q => (
                             <div
                                 key={q.id}
                                 onClick={() => handleSelectQuestion(q)}

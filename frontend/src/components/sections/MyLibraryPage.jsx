@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Trash2, FileUp, Loader2, Bookmark } from "lucide-react";
 import { getBookmarkedNotes, getNotes, handleDownload } from "../../services/notesService";
 import NotesList from "../NotesList";
+import EditNoteModal from "../EditNoteModal";
 
 export default function MyLibraryPage({ user }) {
     const [activeTab, setActiveTab] = useState("Bookmarks");
     const [searchQuery, setSearchQuery] = useState("");
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [editingNote, setEditingNote] = useState(null);
 
     const tabs = ["Bookmarks", "My Uploads"];
 
@@ -28,7 +30,7 @@ export default function MyLibraryPage({ user }) {
                 // For simplicity, let's just fetch all notes and filter logic-wise 
                 // In a real app, we'd filter by user_id in the service
                 const allNotes = await getNotes();
-                data = allNotes.filter(n => n.user_id === user.id);
+                data = allNotes.filter(n => n.user_id === user.id).map(n => ({ ...n, isOwner: true }));
             }
             setNotes(data || []);
         } catch (error) {
@@ -50,13 +52,25 @@ export default function MyLibraryPage({ user }) {
             if (window.showToast) window.showToast("Download failed", "error");
         }
     };
+
+    const handleEditNote = (note) => {
+        setEditingNote(note);
+    };
+
+    const handleNoteUpdated = (updatedNote) => {
+        setNotes(prev => prev.map(n => n.id === updatedNote.id ? updatedNote : n));
+    };
+
+    const handleNoteDeleted = (deletedNoteId) => {
+        setNotes(prev => prev.filter(n => n.id !== deletedNoteId));
+    };
     return (
         <div className="flex-1 flex flex-col overflow-hidden bg-background">
             {/* Header */}
             <div className="p-6 md:p-8 border-b border-border bg-surface shrink-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div>
-                        <h1 className="text-3xl font-heading font-extrabold text-white tracking-tight">My Library</h1>
+                        <h1 className="text-3xl font-heading font-extrabold text-text-main tracking-tight">My Library</h1>
                         <p className="text-text-muted mt-1">Manage your saved materials and uploads.</p>
                     </div>
 
@@ -99,8 +113,25 @@ export default function MyLibraryPage({ user }) {
                 {loading ? (
                     <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary w-12 h-12" /></div>
                 ) : (
-                    <NotesList notes={notes} loading={loading} onDownloadNote={onDownloadNote} userId={user?.id} />
+                    <NotesList 
+                        notes={notes.filter(n => 
+                            n.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            n.subject?.toLowerCase().includes(searchQuery.toLowerCase())
+                        )} 
+                        loading={loading} 
+                        onDownloadNote={onDownloadNote} 
+                        onEditNote={handleEditNote}
+                        userId={user?.id} 
+                    />
                 )}
+
+                <EditNoteModal 
+                    isOpen={!!editingNote} 
+                    note={editingNote} 
+                    onClose={() => setEditingNote(null)} 
+                    onUpdate={handleNoteUpdated}
+                    onDelete={handleNoteDeleted}
+                />
 
                 {!loading && notes.length === 0 && activeTab === "My Uploads" && (
                     <div className="h-full flex flex-col items-center justify-center text-center opacity-80 mt-16 pb-20">
@@ -108,7 +139,7 @@ export default function MyLibraryPage({ user }) {
                             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
                             <div className="text-7xl relative z-10 drop-shadow-2xl">📂</div>
                         </div>
-                        <h3 className="text-2xl font-heading font-bold text-white mb-2">You haven't uploaded anything yet</h3>
+                        <h3 className="text-2xl font-heading font-bold text-text-main mb-2">You haven't uploaded anything yet</h3>
                         <p className="text-text-muted max-w-md mb-8">
                             Share your study materials to help others and build your academic profile.
                         </p>

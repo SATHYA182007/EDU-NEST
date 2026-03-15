@@ -1,7 +1,7 @@
 import { supabase } from "./lib/supabaseClient";
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Sun, Moon, Bell, Menu, X } from 'lucide-react'
+import { Sun, Moon, Bell, Menu, X } from 'lucide-react'
 import Sidebar from './components/sections/Sidebar'
 import Dashboard from './components/sections/Dashboard'
 import Hero from './components/sections/Hero'
@@ -13,21 +13,60 @@ import MyLibraryPage from './components/sections/MyLibraryPage'
 import VideoSection from './components/VideoSection'
 import QuizComponent from './components/QuizComponent'
 import DiscussionSection from './components/DiscussionSection'
+import CoursesPage from './components/sections/CoursesPage'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('landing')
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'landing')
   const [user, setUser] = useState(null)
   const [authView, setAuthView] = useState(false)
   const [loading, setLoading] = useState(true)
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark')
-  const [searchQuery, setSearchQuery] = useState('')
   const [toasts, setToasts] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications] = useState([
-    { id: 1, text: "Welcome to EduNest, Sathya M!", time: "Just now", read: false },
+    { id: 1, text: "Welcome to EduNest!", time: "Just now", read: false },
     { id: 2, text: "New Physics quiz is now available!", time: "2 hrs ago", read: false },
     { id: 3, text: "Your 'Quantum Mechanics' upload reached 10 downloads!", time: "5 hrs ago", read: true },
   ])
+
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    // 1. Initial Session logic
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setLoading(false);
+      
+      // ONLY redirect if they are on the landing page at boot
+      if (currentUser && activeTab === 'landing') {
+        setActiveTab('browse');
+      }
+    };
+    initAuth();
+
+    // 2. Auth State Listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        setAuthView(false);
+        // We removed the automatic redirect to 'browse' here to avoid 
+        // unexpected jumps while in the middle of a quiz/page.
+      } else {
+        if (event === 'SIGNED_OUT') {
+          setActiveTab('landing');
+          setAuthView(false);
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []); 
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -42,30 +81,6 @@ function App() {
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   }
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null
-      setUser(currentUser)
-      setLoading(false)
-      if (currentUser && activeTab === 'landing') {
-        setActiveTab('browse')
-      }
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user ?? null
-      setUser(currentUser)
-      if (currentUser) {
-        setAuthView(false)
-        if (activeTab === 'landing') setActiveTab('browse')
-      } else {
-        setActiveTab('landing')
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [activeTab])
 
   useEffect(() => {
     window.showToast = (message, type = 'success') => {
@@ -112,9 +127,11 @@ function App() {
       case 'upload':
         return <UploadPage user={user} />
       case 'browse':
-        return <BrowsePage searchQuery={searchQuery} user={user} />
+        return <BrowsePage user={user} />
       case 'videos':
         return <VideoSection user={user} />
+      case 'courses':
+        return <CoursesPage user={user} />
       case 'quizzes':
         return <QuizComponent user={user} />
       case 'forum':
@@ -124,7 +141,7 @@ function App() {
       case 'settings':
         return <SettingsPage user={user} />
       default:
-        return <BrowsePage searchQuery={searchQuery} user={user} />
+        return <BrowsePage user={user} />
     }
   }
 
@@ -147,15 +164,10 @@ function App() {
       <main className={`flex-1 flex flex-col relative overflow-hidden h-screen bg-background ${!showSidebar ? 'w-full' : ''}`}>
         {showSidebar && (
           <header className="h-20 border-b border-border bg-surface/50 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-40">
-            <div className="flex-1 max-w-2xl relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors" />
-              <input
-                type="text"
-                placeholder="Search by topic, course, or subject..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-surface-2 border border-border rounded-xl py-3 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
+            <div className="flex-1">
+              <h2 className="text-xl font-sora font-extrabold text-text-main capitalize">
+                {activeTab === 'browse' ? 'Browse Notes' : activeTab === 'forum' ? 'Community' : activeTab.replace('-', ' ')}
+              </h2>
             </div>
 
             <div className="flex items-center gap-4">

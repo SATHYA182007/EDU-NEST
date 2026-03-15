@@ -99,7 +99,7 @@ export const handleDownload = async (fileUrl, noteId, fileName) => {
 /**
  * Uploads a note file to storage and metadata to the database.
  */
-export const uploadNote = async ({ file, title, subject, description, userId }) => {
+export const uploadNote = async ({ file, title, subject, description, semester, userId }) => {
     try {
         if (!file) throw new Error("No file selected.");
 
@@ -131,6 +131,7 @@ export const uploadNote = async ({ file, title, subject, description, userId }) 
                     file_url: fileUrl,
                     downloads: 0,
                     rating: 0,
+                    semester,
                     user_id: userId
                 }
             ])
@@ -235,5 +236,63 @@ export const rateNote = async (userId, noteId, ratingValue) => {
     }
 
     return true;
+};
+
+/**
+ * Updates a note's metadata.
+ */
+export const updateNote = async (noteId, { title, subject, description, semester }) => {
+    const { data, error } = await supabase
+        .from('notes')
+        .update({
+            title,
+            subject,
+            description,
+            semester,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', noteId)
+        .select();
+
+    if (error) {
+        throw new Error(`Failed to update note: ${error.message}`);
+    }
+    return data[0];
+};
+
+/**
+ * Deletes a note and its associated file from storage.
+ */
+export const deleteNote = async (noteId, fileUrl) => {
+    try {
+        // 1. Delete from storage if fileUrl is provided
+        if (fileUrl) {
+            const urlParts = fileUrl.split('/');
+            const filePath = urlParts[urlParts.length - 1];
+            
+            const { error: storageError } = await supabase.storage
+                .from('notes-files')
+                .remove([filePath]);
+                
+            if (storageError) {
+                console.error("Storage deletion error:", storageError);
+                // We keep going even if storage delete fails, 
+                // but usually we want to know.
+            }
+        }
+
+        // 2. Delete from database
+        const { error } = await supabase
+            .from('notes')
+            .delete()
+            .eq('id', noteId);
+
+        if (error) {
+            throw new Error(`Failed to delete note: ${error.message}`);
+        }
+        return true;
+    } catch (error) {
+        throw error;
+    }
 };
 

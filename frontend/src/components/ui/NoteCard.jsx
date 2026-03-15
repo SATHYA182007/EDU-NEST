@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { Download, Star, Bookmark, MoreVertical, FileText } from "lucide-react";
+import { Download, Star, Bookmark, MoreVertical, FileText, Pencil } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useState } from "react";
 import { addBookmark, removeBookmark, rateNote } from "../../services/notesService";
 
-export default function NoteCard({ note, userId }) {
+export default function NoteCard({ note, userId, onEdit }) {
     const [isBookmarked, setIsBookmarked] = useState(note.isBookmarked || false);
     const [rating, setRating] = useState(note.rating || 0);
     const authorName = note.author || "Anonymous";
@@ -68,6 +68,16 @@ export default function NoteCard({ note, userId }) {
                     >
                         <Bookmark className={cn("w-4 h-4", isBookmarked && "fill-primary")} />
                     </button>
+
+                    {(note.isOwner || (userId && note.user_id && String(note.user_id) === String(userId))) && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEdit && onEdit(note); }}
+                            className="p-2 rounded-xl bg-primary/20 backdrop-blur-md border border-primary/30 text-primary hover:bg-primary hover:text-white transition-all shadow-lg group/edit"
+                            title="Edit Note"
+                        >
+                            <Pencil className="w-4 h-4 group-hover/edit:rotate-12 transition-transform" />
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -122,7 +132,7 @@ export default function NoteCard({ note, userId }) {
                         e.stopPropagation();
                         if (note.onDownload) note.onDownload(note);
                     }}
-                    className="w-full btn btn-primary py-2.5 text-xs flex items-center gap-2 rounded-xl group/btn transition-all active:scale-95"
+                    className="w-full btn btn-primary py-2.5 text-xs flex items-center justify-center gap-2 rounded-xl group/btn transition-all active:scale-95"
                 >
                     <Download className="w-4 h-4 group-hover/btn:animate-bounce" />
                     <span>Download Resource</span>

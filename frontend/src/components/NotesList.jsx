@@ -1,7 +1,7 @@
 import NoteCard from "./ui/NoteCard";
 import { Loader2, X } from "lucide-react";
 
-export default function NotesList({ notes, loading, onDownloadNote, userId }) {
+export default function NotesList({ notes, loading, onDownloadNote, onEditNote, userId }) {
     if (loading) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center py-20 gap-4">
@@ -26,7 +26,7 @@ export default function NotesList({ notes, loading, onDownloadNote, userId }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {notes.map((note) => (
-                <NoteCard key={note.id} note={{ ...note, onDownload: onDownloadNote }} userId={userId} />
+                <NoteCard key={note.id} note={{ ...note, onDownload: onDownloadNote }} userId={userId} onEdit={onEditNote} />
             ))}
         </div>
     );

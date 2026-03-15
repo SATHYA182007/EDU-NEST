@@ -29,3 +29,17 @@ export const uploadVideo = async ({ title, subject, description, video_url, user
     }
     return data[0];
 };
+/**
+ * Deletes a video from the "videos" table by ID.
+ */
+export const deleteVideo = async (id) => {
+    const { error } = await supabase
+        .from('videos')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        throw new Error(`Failed to delete video: ${error.message}`);
+    }
+    return true;
+};
