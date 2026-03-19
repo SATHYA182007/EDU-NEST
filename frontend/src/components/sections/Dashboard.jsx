@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { FileUp, Download, Eye, Flame, Activity, Calendar, CheckSquare, Clock, Users, BookOpen, Star, Trophy } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from "../../lib/utils";
 import NoteCard from "../ui/NoteCard";
 import { handleDownload } from "../../services/notesService";
@@ -36,24 +37,24 @@ function useAnimatedCounter(end, duration = 2000) {
 }
 
 const StatCard = ({ icon: Icon, label, value, delay }) => {
-    const displayValue = useAnimatedCounter(typeof value === 'number' ? value : parseInt(value.replace(/,/g, '')));
+    const displayValue = useAnimatedCounter(typeof value === 'number' ? value : parseInt(String(value).replace(/,/g, '')));
     const suffix = typeof value === 'string' && value.includes('k') ? 'k' : '';
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay }}
-            className="stat-card p-6 flex flex-col justify-between h-32"
+            transition={{ delay, type: "spring", stiffness: 260, damping: 20 }}
+            className="stat-card p-6 flex flex-col justify-between h-32 group hover:border-primary/50"
         >
             <div className="flex justify-between items-start">
                 <div>
-                    <p className="text-sm font-semibold text-text-muted mb-1">{label}</p>
-                    <h3 className="text-3xl font-heading font-bold text-text-main">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-1 opacity-80">{label}</p>
+                    <h3 className="text-3xl font-sora font-extrabold text-text-main group-hover:text-primary transition-colors">
                         {displayValue.toLocaleString()}{suffix}
                     </h3>
                 </div>
-                <div className="p-3 rounded-xl bg-surface-2 border border-border">
+                <div className="p-3 rounded-2xl bg-surface-2 border border-border group-hover:scale-110 group-hover:bg-primary/5 transition-all duration-300">
                     <Icon className="w-5 h-5 text-primary" />
                 </div>
             </div>
@@ -61,76 +62,99 @@ const StatCard = ({ icon: Icon, label, value, delay }) => {
     );
 };
 
-// Vanilla SVG Bar Chart
+// Recharts Line Chart
 const ActivityChart = ({ data = [0, 0, 0, 0, 0, 0, 0] }) => {
-    const max = Math.max(...data, 5); 
-    const labels = [];
     const today = new Date();
+    const chartData = [];
     
-    // Generate labels for last 7 days including today
+    // Generate data array for recharts
     for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(today.getDate() - i);
-        labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+        chartData.push({
+            name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+            uploads: data[6 - i]
+        });
     }
 
     return (
-        <div className="card-premium p-6 flex flex-col h-full min-h-[300px]">
-            <h3 className="text-lg font-heading font-bold mb-6 flex items-center gap-2">
-                <Activity className="w-5 h-5 text-primary" />
-                Upload Activity (Last 7 Days)
-            </h3>
-            
-            <div className="flex-1 flex items-end justify-between gap-3 relative mt-4">
-                {/* Horizontal Grid Lines */}
-                <div className="absolute inset-x-0 inset-y-0 flex flex-col justify-between pointer-events-none">
-                    <div className="w-full border-t border-border/30 h-0"></div>
-                    <div className="w-full border-t border-border/30 h-0"></div>
-                    <div className="w-full border-t border-border/30 h-0"></div>
-                    <div className="w-full border-b border-border/50 h-0"></div>
+        <div className="card-premium p-6 flex flex-col h-full min-h-[350px]">
+            <div className="flex items-center justify-between mb-8">
+                <h3 className="text-lg font-sora font-extrabold flex items-center gap-3 text-text-main">
+                    <div className="p-2 rounded-xl bg-primary/10">
+                        <Activity className="w-5 h-5 text-primary" />
+                    </div>
+                    Activity Analytics
+                </h3>
+                <div className="flex gap-2">
+                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted bg-surface-2 px-3 py-1 rounded-full border border-border">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                        Live Updates
+                    </span>
                 </div>
-
-                {/* Bars */}
-                {data.map((val, idx) => {
-                    const heightPercent = (val / max) * 100;
-                    return (
-                        <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full z-10 group relative">
-                            {/* Bar Container */}
-                            <div className="w-full max-w-[32px] bg-primary/5 rounded-t-lg relative flex items-end justify-center h-full overflow-hidden">
-                                <motion.div
-                                    initial={{ height: 0 }}
-                                    animate={{ height: `${Math.max(heightPercent, val > 0 ? 5 : 0)}%` }}
-                                    transition={{ 
-                                        type: "spring",
-                                        damping: 20,
-                                        stiffness: 100,
-                                        delay: idx * 0.1 
-                                    }}
-                                    className="w-full bg-gradient-to-t from-primary to-primary-light rounded-t-lg relative cursor-pointer shadow-[0_0_15px_rgba(108,99,255,0.3)] group-hover:brightness-125 transition-all"
-                                >
-                                    {/* Tooltip on hover */}
-                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface border border-border text-[10px] font-bold py-1 px-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl z-20 pointer-events-none">
-                                        {val} uploads
-                                    </div>
-                                </motion.div>
-                            </div>
-                            <span className="text-[10px] font-bold text-text-muted mt-3 group-hover:text-primary transition-colors uppercase tracking-tight">
-                                {labels[idx]}
-                            </span>
-                        </div>
-                    );
-                })}
+            </div>
+            
+            <div className="flex-1 mt-2 -ml-4">
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <defs>
+                            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="var(--color-primary)" />
+                                <stop offset="100%" stopColor="var(--color-secondary)" />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.5} />
+                        <XAxis 
+                            dataKey="name" 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 700 }} 
+                            dy={10}
+                        />
+                        <YAxis 
+                            allowDecimals={false}
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 700 }}
+                        />
+                        <Tooltip 
+                            contentStyle={{ 
+                                backgroundColor: 'var(--color-surface)', 
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '20px',
+                                boxShadow: 'var(--shadow-xl)',
+                                padding: '12px 16px'
+                            }}
+                            itemStyle={{ color: 'var(--color-text-main)', fontSize: '13px', fontWeight: 'bold' }}
+                            labelStyle={{ color: 'var(--color-text-muted)', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.05em' }}
+                            cursor={{ stroke: 'var(--color-primary)', strokeWidth: 1.5, strokeDasharray: '4 4' }}
+                        />
+                        <Line 
+                            type="monotone" 
+                            dataKey="uploads" 
+                            stroke="url(#lineGradient)" 
+                            strokeWidth={4} 
+                            dot={{ fill: 'var(--color-surface)', stroke: 'var(--color-primary)', strokeWidth: 3, r: 6 }}
+                            activeDot={{ r: 8, fill: 'var(--color-primary)', stroke: '#fff', strokeWidth: 3 }}
+                            animationDuration={2000}
+                        />
+                    </LineChart>
+                </ResponsiveContainer>
             </div>
         </div>
     );
 };
 
 export default function Dashboard({ user }) {
-    const [stats, setStats] = useState({ downloads: 0, uploads: 0, views: 892, streak: 14 });
+    const [stats, setStats] = useState({ downloads: 0, uploads: 0, views: 0, streak: 0 });
     const [recentNotes, setRecentNotes] = useState([]);
     const [uploadActivity, setUploadActivity] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [loading, setLoading] = useState(true);
     const [activeCourses, setActiveCourses] = useState([]);
+    const [studyTasks, setStudyTasks] = useState([]);
+    const [plannerItems, setPlannerItems] = useState([]);
+    const [mastery, setMastery] = useState(0);
+    const [communityData, setCommunityData] = useState({ users: 0, resources: 0 });
 
     const onDownloadNote = async (note) => {
         try {
@@ -152,14 +176,14 @@ export default function Dashboard({ user }) {
                 // Fetch stats
                 const { data: notesData, error: notesError } = await supabase
                     .from('notes')
-                    .select('id, downloads');
+                    .select('id, downloads, user_id');
 
                 if (notesError) throw notesError;
 
                 const totalUploads = notesData.length;
                 const totalDownloads = notesData.reduce((acc, curr) => acc + (curr.downloads || 0), 0);
-
-                setStats(prev => ({ ...prev, uploads: totalUploads, downloads: totalDownloads }));
+                const uniqueUsers = new Set(notesData.map(n => n.user_id).filter(Boolean)).size;
+                setCommunityData({ users: uniqueUsers > 0 ? uniqueUsers : 1, resources: totalUploads });
 
                 // Fetch recent notes
                 const { data: recent, error: recentError } = await supabase
@@ -196,12 +220,24 @@ export default function Dashboard({ user }) {
                 // Load course progress
                 const progressData = loadProgress();
                 const ongoing = [];
+                let totalCompletedLessons = 0;
+                let activeCoursesCount = 0;
+                let totalLessonsInActive = 0;
+                
+                const dynamicTasks = [];
+                const dynamicPlanner = [];
+
                 for (const cat of COURSES_DATA) {
                     for (const course of cat.courses) {
                         const key = cat.id + "_" + course.id;
                         const states = progressData[key] || {};
                         const completedCount = Object.values(states).filter(Boolean).length;
+                        
                         if (completedCount > 0) {
+                            activeCoursesCount++;
+                            totalCompletedLessons += completedCount;
+                            totalLessonsInActive += course.lessons.length;
+                            
                             ongoing.push({
                                 ...course,
                                 categoryName: cat.lang,
@@ -210,9 +246,66 @@ export default function Dashboard({ user }) {
                                 totalLessons: course.lessons.length,
                                 pct: Math.round((completedCount / course.lessons.length) * 100)
                             });
+                            
+                            // Get state to find uncompleted lessons
+                            const stateKeys = Object.keys(states).map(k => parseInt(k));
+                            const completedIds = stateKeys.filter(k => states[k]);
+                            
+                            // Find next lesson for task
+                            const nextLesson = course.lessons.find(l => !completedIds.includes(l.id));
+                            if (nextLesson && dynamicTasks.length < 5) {
+                                dynamicTasks.push({
+                                    id: `task_${key}_${nextLesson.id}`,
+                                    text: `${course.title}: ${nextLesson.title}`,
+                                    completed: false
+                                });
+                            }
+                            
+                            // Find next quiz/exercise for planner
+                            const nextAssessment = course.lessons.find(l => 
+                                !completedIds.includes(l.id) && (l.type === 'quiz' || l.type === 'exercise')
+                            );
+                            if (nextAssessment && dynamicPlanner.length < 3) {
+                                dynamicPlanner.push({
+                                    id: `plan_${key}_${nextAssessment.id}`,
+                                    title: `${course.title}: ${nextAssessment.title}`,
+                                    date: "Upcoming",
+                                    priority: nextAssessment.type === 'quiz' ? 'high' : 'med'
+                                });
+                            }
                         }
                     }
                 }
+                
+                if (dynamicTasks.length === 0) {
+                    dynamicTasks.push(
+                        { id: 't1', text: "Explore Course Library", completed: false },
+                        { id: 't2', text: "Upload your first note", completed: totalUploads > 0 },
+                        { id: 't3', text: "Download a resource", completed: totalDownloads > 0 }
+                    );
+                }
+                
+                if (dynamicPlanner.length === 0) {
+                    dynamicPlanner.push(
+                        { id: 'p1', title: "Start a new course", date: "Today", priority: "high" },
+                        { id: 'p2', title: "Upload study materials", date: "This Week", priority: "med" }
+                    );
+                }
+                
+                setStudyTasks(dynamicTasks.slice(0, 5));
+                setPlannerItems(dynamicPlanner.slice(0, 3));
+                
+                const masteryPct = totalLessonsInActive > 0 ? Math.round((totalCompletedLessons / totalLessonsInActive) * 100) : 0;
+                setMastery(masteryPct);
+                
+                setStats(prev => ({ 
+                    ...prev, 
+                    uploads: totalUploads, 
+                    downloads: totalDownloads,
+                    views: totalCompletedLessons,
+                    streak: activeCoursesCount
+                }));
+
                 // Sort by most recently interacted or highest progress (we'll just sort by pct desc)
                 setActiveCourses(ongoing.sort((a,b) => b.pct - a.pct));
 
@@ -232,31 +325,6 @@ export default function Dashboard({ user }) {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    const trendingSubjects = [
-        { name: "Computer Science", count: 1240 },
-        { name: "Mathematics", count: 980 },
-        { name: "Physics", count: 850 },
-        { name: "Biology", count: 640 },
-        { name: "Business", count: 420 }
-    ];
-
-    const deadlines = [
-        { id: 1, title: "Calculus Assignment", date: "Tomorrow", priority: "high" },
-        { id: 2, title: "Physics Group Quiz", date: "Mar 18, 2026", priority: "med" },
-        { id: 3, title: "Submit Lab Reports", date: "Mar 20, 2026", priority: "low" },
-    ];
-
-    const tasks = [
-        { id: 1, text: "Review Lecture 4 Videos", completed: false },
-        { id: 2, text: "Download DS PDF", completed: true },
-        { id: 3, text: "Check Community Forum", completed: false },
-    ];
-
-    const communityStats = [
-        { label: "Active Students", value: "12,402", icon: Users },
-        { label: "Verified Resources", value: "85k+", icon: CheckSquare },
-    ];
-
     return (
         <div className="flex-1 flex overflow-hidden">
             {/* Main Content Area */}
@@ -267,15 +335,15 @@ export default function Dashboard({ user }) {
                     <h1 className="text-4xl font-sora font-extrabold text-text-main tracking-tighter">
                         Welcome back, <span className="text-primary">{displayName}</span> 👋
                     </h1>
-                    <p className="text-text-muted font-medium">{currentDate} • Computer Science</p>
+                    <p className="text-text-muted font-medium">{currentDate} • {activeCourses.length > 0 ? activeCourses[0].categoryName : 'Student Hub'}</p>
                 </div>
 
                 {/* Stat Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard icon={FileUp} label="Total Uploads" value={stats.uploads} delay={0.1} />
                     <StatCard icon={Download} label="Total Downloads" value={stats.downloads} delay={0.2} />
-                    <StatCard icon={Eye} label="Views This Week" value={stats.views} delay={0.3} />
-                    <StatCard icon={Flame} label="Streak Days" value={stats.streak} delay={0.4} />
+                    <StatCard icon={BookOpen} label="Lessons Done" value={stats.views} delay={0.3} />
+                    <StatCard icon={Activity} label="Active Courses" value={stats.streak} delay={0.4} />
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -288,7 +356,7 @@ export default function Dashboard({ user }) {
                     {activeCourses.length > 0 ? (
                         <div className="card-premium p-6 flex flex-col max-h-[400px]">
                             <div className="flex items-center justify-between mb-5 shrink-0">
-                                <h3 className="text-lg font-heading font-bold flex items-center gap-2 text-white line-clamp-1">
+                                <h3 className="text-lg font-heading font-bold flex items-center gap-2 text-text-main line-clamp-1">
                                     <BookOpen className="w-5 h-5 text-primary shrink-0" />
                                     Course Progress
                                 </h3>
@@ -358,7 +426,7 @@ export default function Dashboard({ user }) {
                             <button className="text-[10px] font-bold text-primary hover:underline uppercase tracking-wider">View All</button>
                         </div>
                         <div className="space-y-3">
-                            {deadlines.map((item) => (
+                            {plannerItems.map((item) => (
                                 <div key={item.id} className="p-4 rounded-2xl bg-surface-2 border border-border group hover:border-primary/50 transition-all cursor-pointer">
                                     <div className="flex justify-between items-start mb-2">
                                         <span className={cn(
@@ -371,7 +439,7 @@ export default function Dashboard({ user }) {
                                         </span>
                                         <Clock className="w-3 h-3 text-text-muted group-hover:text-primary transition-colors" />
                                     </div>
-                                    <h4 className="text-xs font-bold text-text-main line-clamp-1">{item.title}</h4>
+                                    <h4 className="text-xs font-bold text-text-main line-clamp-1" title={item.title}>{item.title}</h4>
                                     <p className="text-[10px] text-text-muted mt-1 font-medium italic">{item.date}</p>
                                 </div>
                             ))}
@@ -385,18 +453,18 @@ export default function Dashboard({ user }) {
                             Study Tasks
                         </h3>
                         <div className="space-y-2">
-                            {tasks.map((task) => (
+                            {studyTasks.map((task) => (
                                 <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-2 transition-colors cursor-pointer group">
                                     <div className={cn(
-                                        "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
+                                        "w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0",
                                         task.completed ? "bg-success border-success" : "border-border bg-surface group-hover:border-primary"
                                     )}>
-                                        {task.completed && <Activity className="w-3 h-3 text-white" />}
+                                        {task.completed && <Activity className="w-3 h-3 text-text-main" />}
                                     </div>
                                     <span className={cn(
-                                        "text-xs font-medium transition-all",
+                                        "text-xs font-medium transition-all line-clamp-2 leading-tight",
                                         task.completed ? "text-text-muted line-through" : "text-text-main group-hover:text-primary"
-                                    )}>
+                                    )} title={task.text}>
                                         {task.text}
                                     </span>
                                 </div>
@@ -412,17 +480,24 @@ export default function Dashboard({ user }) {
                             Global Pulse
                         </h4>
                         <div className="grid grid-cols-1 gap-4">
-                            {communityStats.map((stat, idx) => (
-                                <div key={idx} className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-surface border border-border shadow-sm">
-                                        <stat.icon className="w-4 h-4 text-text-muted" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider leading-none mb-1">{stat.label}</p>
-                                        <p className="text-sm font-bold text-text-main font-sora">{stat.value}</p>
-                                    </div>
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-surface border border-border shadow-sm">
+                                    <Users className="w-4 h-4 text-text-muted" />
                                 </div>
-                            ))}
+                                <div>
+                                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider leading-none mb-1">Contributors</p>
+                                    <p className="text-sm font-bold text-text-main font-sora">{communityData.users}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-surface border border-border shadow-sm">
+                                    <CheckSquare className="w-4 h-4 text-text-muted" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider leading-none mb-1">Resources</p>
+                                    <p className="text-sm font-bold text-text-main font-sora">{communityData.resources}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -433,14 +508,14 @@ export default function Dashboard({ user }) {
                                 <Trophy className="w-6 h-6 text-warning" />
                             </div>
                             <div>
-                                <h4 className="text-xs font-black text-warning uppercase tracking-widest leading-none mb-1">Weekly Goal</h4>
-                                <p className="text-sm font-bold text-text-main">80% Mastery</p>
+                                <h4 className="text-xs font-black text-warning uppercase tracking-widest leading-none mb-1">Course Mastery</h4>
+                                <p className="text-sm font-bold text-text-main">{mastery}% Overall</p>
                             </div>
                         </div>
                         <div className="w-full h-2 bg-surface rounded-full overflow-hidden border border-border">
-                            <div className="h-full bg-warning w-[65%] group-hover:w-[75%] transition-all duration-700 shadow-[0_0_10px_rgba(255,171,0,0.4)]" />
+                            <div className="h-full bg-warning transition-all duration-700 shadow-[0_0_10px_rgba(255,171,0,0.4)]" style={{ width: `${mastery}%` }} />
                         </div>
-                        <p className="text-[10px] text-text-muted mt-3 font-medium">Keep it up! You're almost at your target.</p>
+                        <p className="text-[10px] text-text-muted mt-3 font-medium">Keep learning to increase your mastery.</p>
                     </div>
 
                 </div>

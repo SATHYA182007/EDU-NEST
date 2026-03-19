@@ -527,4 +527,37 @@ export const COURSES_DATA = [
       },
     ]
   },
+  {
+    id: 'english', lang: 'English Literature', color: '#ec4899',
+    gradient: 'from-pink-600 to-rose-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20',
+    icon: 'En', description: 'Analyze classic works and master critical writing',
+    courses: [
+      {
+        id:'en1', title:'Introduction to Literary Theory', desc:'Learn the fundamental frameworks for analyzing literature.', hours:'5h 30m', level:'Beginner',
+        lessons:[
+          {id:1,title:'What is Literature?',type:T.VIDEO,duration:'10 min'},
+          {id:2,title:'Formalism and New Criticism',type:T.READING,duration:'15 min'},
+          {id:3,title:'Structuralism and Post-Structuralism',type:T.VIDEO,duration:'20 min'},
+          {id:4,title:'Marxist Literary Criticism',type:T.READING,duration:'12 min'},
+          {id:5,title:'Feminist Theory in Literature',type:T.VIDEO,duration:'18 min'},
+          {id:6,title:'Post-Colonial Perspectives',type:T.READING,duration:'15 min'},
+          {id:7,title:'Analyzing a Poem',type:T.EXERCISE,duration:'25 min'},
+          {id:8,title:'Module Quiz',type:T.QUIZ,duration:'15 min'},
+        ]
+      },
+      {
+        id:'en2', title:'Shakespearean Drama', desc:'A deep dive into the tragedies and comedies of William Shakespeare.', hours:'6h 45m', level:'Intermediate',
+        lessons:[
+          {id:1,title:'Shakespeare’s Life and Times',type:T.VIDEO,duration:'12 min'},
+          {id:2,title:'Understanding Iambic Pentameter',type:T.READING,duration:'10 min'},
+          {id:3,title:'Tragic Hero: Hamlet and Macbeth',type:T.VIDEO,duration:'25 min'},
+          {id:4,title:'Comedy and Romance: Twelfth Night',type:T.VIDEO,duration:'20 min'},
+          {id:5,title:'Themes of Power and Ambition',type:T.READING,duration:'15 min'},
+          {id:6,title:'Modern Adaptations of Shakespeare',type:T.VIDEO,duration:'18 min'},
+          {id:7,title:'Essay: The Ghost in Hamlet',type:T.EXERCISE,duration:'45 min'},
+          {id:8,title:'Module Quiz',type:T.QUIZ,duration:'20 min'},
+        ]
+      },
+    ]
+  },
 ];

@@ -5,7 +5,7 @@ import NoteCard from "./ui/NoteCard";
 import { uploadNote } from "../services/notesService";
 
 const steps = ["Upload File", "Note Details", "Preview & Publish"];
-const subjects = ["Computer Science", "Physics", "Mathematics", "Biology", "Economics", "History"];
+const subjects = ["Computer Science", "Physics", "Mathematics", "Biology", "Economics", "History", "English Literature"];
 
 export default function UploadForm({ user }) {
     const [currentStep, setCurrentStep] = useState(1);
@@ -72,8 +72,16 @@ export default function UploadForm({ user }) {
     }
 
     const nextStep = () => {
-        if (currentStep === 1 && !file) return alert("Please select a file first.");
-        if (currentStep === 2 && (!title || !subject)) return alert("Please fill out the required details.");
+        if (currentStep === 1 && !file) {
+            if (window.showToast) window.showToast("Please select a file to upload first!", "error");
+            else alert("Please select a file to upload first.");
+            return;
+        }
+        if (currentStep === 2 && (!title || !subject)) {
+            if (window.showToast) window.showToast("Please fill out the required title and subject details.", "error");
+            else alert("Please fill out the required details.");
+            return;
+        }
         setCurrentStep(prev => Math.min(prev + 1, 3));
     };
 
@@ -119,7 +127,7 @@ export default function UploadForm({ user }) {
         <div className="w-full max-w-3xl space-y-10 mt-4 hidden-scrollbar relative z-10">
             {/* Header & Progress Indicator */}
             <div className="text-center space-y-8">
-                <h1 className="text-4xl font-heading font-extrabold text-white tracking-tight">Share Your Knowledge</h1>
+                <h1 className="text-4xl font-heading font-extrabold text-text-main tracking-tight">Share Your Knowledge</h1>
                 <div className="flex items-center justify-center pt-2">
                     {steps.map((label, idx) => {
                         const stepNum = idx + 1;
@@ -129,7 +137,7 @@ export default function UploadForm({ user }) {
                         return (
                             <div key={stepNum} className="flex items-center">
                                 <div className={`flex flex-col items-center relative ${active ? 'scale-110 shadow-[0_0_15px_rgba(108,99,255,0.4)] rounded-full' : ''} transition-transform`}>
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 ${active ? 'border-primary bg-primary text-white' :
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 ${active ? 'border-primary bg-primary text-text-main' :
                                         completed ? 'border-success bg-success/10 text-success' :
                                             'border-border bg-surface-2 text-text-muted'
                                         } transition-colors z-10 relative`}>
@@ -167,14 +175,14 @@ export default function UploadForm({ user }) {
                                         <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mb-4 text-success">
                                             <FileText className="w-8 h-8" />
                                         </div>
-                                        <p className="font-bold text-lg text-white mb-1">{file.name}</p>
+                                        <p className="font-bold text-lg text-text-main mb-1">{file.name}</p>
                                         <p className="text-sm text-text-muted">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                                         <button className="mt-4 text-sm text-primary hover:underline font-semibold" onClick={(e) => { e.stopPropagation(); setFile(null); }}>Remove and select another</button>
                                     </>
                                 ) : (
                                     <>
                                         <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center mb-4 text-text-muted"><UploadCloud className="w-8 h-8" /></div>
-                                        <p className="font-bold text-lg text-white mb-2">Click to upload or drag and drop</p>
+                                        <p className="font-bold text-lg text-text-main mb-2">Click to upload or drag and drop</p>
                                         <p className="text-sm text-text-muted">PDF, DOCX, or PPT up to 50MB</p>
                                     </>
                                 )}
@@ -198,7 +206,7 @@ export default function UploadForm({ user }) {
                                         {tags.map(tag => (
                                             <span key={tag} className="flex items-center gap-1 bg-surface py-1 px-2.5 rounded border border-border text-sm font-semibold">{tag}<X className="w-3 h-3 cursor-pointer hover:text-danger" onClick={() => removeTag(tag)} /></span>
                                         ))}
-                                        <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={addTag} className="flex-1 bg-transparent border-none outline-none text-sm text-white px-2 py-1 min-w-[120px]" placeholder="Type and press enter..." />
+                                        <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={addTag} className="flex-1 bg-transparent border-none outline-none text-sm text-text-main px-2 py-1 min-w-[120px]" placeholder="Type and press enter..." />
                                     </div>
                                 </div>
                                 <div><label className="block text-sm font-bold text-text-main mb-1.5">Description</label><textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input-field min-h-[100px] resize-y" placeholder="Add context about these notes..." /></div>
@@ -230,7 +238,7 @@ export default function UploadForm({ user }) {
                 <div className="mt-10 flex justify-between pt-6 border-t border-border">
                     <button onClick={prevStep} className={`btn btn-ghost ${currentStep === 1 ? 'invisible' : ''}`} disabled={isUploading}>Back</button>
                     {currentStep < 3 ? (
-                        <button onClick={nextStep} className="btn btn-primary" disabled={currentStep === 1 && !file}>Next Step <ChevronRight className="w-4 h-4" /></button>
+                        <button onClick={nextStep} className="btn btn-primary">Next Step <ChevronRight className="w-4 h-4" /></button>
                     ) : (
                         <div className="flex gap-3">
                             <button className="btn btn-ghost hover:bg-warning/10 hover:border-warning/30 hover:text-warning" disabled={isUploading} onClick={() => { window.showToast && window.showToast("Saved as Draft", 'success'); resetForm(); }}>Save Draft</button>

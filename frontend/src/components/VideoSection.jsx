@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { getVideos, uploadVideo, deleteVideo } from '../services/videoService';
 import { Play, Plus, Video, Search, ChevronRight, Loader2, X, Trash2 } from 'lucide-react';
 
+const subjects = ["Computer Science", "Physics", "Mathematics", "Biology", "Economics", "History", "English Literature"];
+
 export default function VideoSection({ user }) {
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -163,13 +165,15 @@ export default function VideoSection({ user }) {
                             </div>
                             <div>
                                 <label className="block text-sm font-bold mb-2">Subject</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3"
+                                <select
+                                    className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 cursor-pointer"
                                     value={newVideo.subject}
                                     onChange={e => setNewVideo({ ...newVideo, subject: e.target.value })}
                                     required
-                                />
+                                >
+                                    <option value="" disabled>Select a subject...</option>
+                                    {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-sm font-bold mb-2">YouTube URL</label>

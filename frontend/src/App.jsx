@@ -1,5 +1,5 @@
 import { supabase } from "./lib/supabaseClient";
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sun, Moon, Bell, Menu, X } from 'lucide-react'
 import Sidebar from './components/sections/Sidebar'
@@ -14,9 +14,17 @@ import VideoSection from './components/VideoSection'
 import QuizComponent from './components/QuizComponent'
 import DiscussionSection from './components/DiscussionSection'
 import CoursesPage from './components/sections/CoursesPage'
+import AssessmentPage from './components/sections/AssessmentPage'
 
 function App() {
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'landing')
+  const [activeTab, setActiveTab] = useState(() => {
+    // Priority: URL path > LocalStorage > Landing
+    const path = window.location.pathname.replace('/', '').toLowerCase();
+    const validTabs = ['dashboard', 'browse', 'videos', 'courses', 'quizzes', 'forum', 'library', 'settings', 'upload', 'assessment'];
+    if (validTabs.includes(path)) return path;
+    
+    return localStorage.getItem('activeTab') || 'landing';
+  });
   const [user, setUser] = useState(null)
   const [authView, setAuthView] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -28,46 +36,139 @@ function App() {
     { id: 2, text: "New Physics quiz is now available!", time: "2 hrs ago", read: false },
     { id: 3, text: "Your 'Quantum Mechanics' upload reached 10 downloads!", time: "5 hrs ago", read: true },
   ])
+  const [assessmentParams, setAssessmentParams] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
+    
+    // Sync URL with Tab for better routing/reload support
+    const currentPath = window.location.pathname.replace('/', '');
+    if (activeTab !== currentPath && activeTab !== 'landing') {
+        window.history.pushState({}, '', `/${activeTab}`);
+    } else if (activeTab === 'landing' && currentPath !== '') {
+        window.history.pushState({}, '', '/');
+    }
   }, [activeTab]);
 
-  useEffect(() => {
-    // 1. Initial Session logic
-    const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setLoading(false);
-      
-      // ONLY redirect if they are on the landing page at boot
-      if (currentUser && activeTab === 'landing') {
-        setActiveTab('browse');
-      }
-    };
-    initAuth();
+    const isRefreshing = useRef(false);
+    const refreshUser = async (authSession = null) => {
+        if (isRefreshing.current) return;
+        isRefreshing.current = true;
+        
+        try {
+            // 1. Get user (either from provided session or fresh)
+            let currentUser = authSession?.user;
+            if (!currentUser) {
+                const { data } = await supabase.auth.getUser();
+                currentUser = data.user;
+            }
 
-    // 2. Auth State Listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      
-      if (currentUser) {
-        setAuthView(false);
-        // We removed the automatic redirect to 'browse' here to avoid 
-        // unexpected jumps while in the middle of a quiz/page.
-      } else {
-        if (event === 'SIGNED_OUT') {
-          setActiveTab('landing');
-          setAuthView(false);
+            if (!currentUser) {
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
+            // 2. Get Profile data from DB table
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .maybeSingle();
+
+            // 3. Merge profile data into user metadata safely
+            const cleanProfile = {};
+            if (profile) {
+                // List of keys we care about in the profiles table
+                const profileKeys = ['full_name', 'university', 'course', 'bio', 'avatar_url'];
+                profileKeys.forEach(key => {
+                    // Only overwrite if DB has a value (non-null)
+                    // We allow empty string "" if it's explicitly in the DB
+                    if (profile[key] !== null) {
+                        cleanProfile[key] = profile[key];
+                    }
+                });
+            }
+
+            const mergedUser = {
+                ...currentUser,
+                user_metadata: {
+                    ...currentUser.user_metadata,
+                    ...cleanProfile
+                }
+            };
+
+            setUser(mergedUser);
+            setLoading(false);
+        } catch (error) {
+            console.error("Refresh user error:", error);
+            setLoading(false);
+        } finally {
+            isRefreshing.current = false;
         }
-      }
-    });
+    };
 
-    return () => subscription.unsubscribe();
-  }, []); 
+    useEffect(() => {
+        let authSubscription = null;
+        let profileSubscription = null;
 
+        const initAuth = async () => {
+            // 1. Initial Load
+            const { data: { user: initialUser } } = await supabase.auth.getUser();
+            if (initialUser) {
+                await refreshUser();
+            } else {
+                setLoading(false);
+            }
+
+            // 2. Auth State Listener
+            const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+                console.log("Auth Event:", event);
+                
+                if (event === 'SIGNED_IN') {
+                    await refreshUser(session);
+                    if (activeTab === 'landing') setActiveTab('browse');
+                } else if (event === 'SIGNED_OUT') {
+                    setUser(null);
+                    setActiveTab('landing');
+                    if (profileSubscription) profileSubscription.unsubscribe();
+                } else if (event === 'USER_UPDATED') {
+                    // Auth metadata changed, but we also rely on Realtime for the profile parts
+                    await refreshUser(session);
+                }
+            });
+            authSubscription = subscription;
+
+            // 3. Realtime Profile Listener
+            if (initialUser) {
+                profileSubscription = supabase
+                    .channel('profile_changes')
+                    .on(
+                        'postgres_changes',
+                        { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${initialUser.id}` },
+                        (payload) => {
+                            console.log("Realtime Profile Change:", payload);
+                            // Avoid double-refresh if auth listener already caught it
+                            setTimeout(() => refreshUser(), 200); 
+                        }
+                    )
+                    .subscribe();
+            }
+        };
+
+        initAuth();
+
+        return () => {
+            if (authSubscription) authSubscription.unsubscribe();
+            if (profileSubscription) profileSubscription.unsubscribe();
+        };
+    }, []); 
+
+  const handleAuthSuccess = async () => {
+    await refreshUser();
+    setActiveTab('browse');
+    setAuthView(false);
+  };
   useEffect(() => {
     const root = window.document.documentElement;
     if (theme === 'light') {
@@ -110,6 +211,15 @@ function App() {
     }
   }
 
+  // Globally accessible helper to trigger assessments
+  useEffect(() => {
+    window.startAssessment = (id, courseData) => {
+      setAssessmentParams({ id, courseData });
+      setActiveTab('assessment');
+    };
+    return () => delete window.startAssessment;
+  }, []);
+
   const renderContent = () => {
     if (authView && !user) {
       return <AuthPage onAuthSuccess={() => setAuthView(false)} />
@@ -139,7 +249,16 @@ function App() {
       case 'library':
         return <MyLibraryPage user={user} />
       case 'settings':
-        return <SettingsPage user={user} />
+        return <SettingsPage user={user} onProfileUpdate={refreshUser} setUser={setUser} />
+      case 'assessment':
+        return (
+          <AssessmentPage 
+            user={user} 
+            assessmentId={assessmentParams?.id} 
+            courseData={assessmentParams?.courseData} 
+            onBack={() => setActiveTab('courses')} 
+          />
+        );
       default:
         return <BrowsePage user={user} />
     }
@@ -163,7 +282,7 @@ function App() {
 
       <main className={`flex-1 flex flex-col relative overflow-hidden h-screen bg-background ${!showSidebar ? 'w-full' : ''}`}>
         {showSidebar && (
-          <header className="h-20 border-b border-border bg-surface/50 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-40">
+          <header className="h-20 border-b border-border glass-header flex items-center justify-between px-8 sticky top-0 z-40 transition-all duration-300">
             <div className="flex-1">
               <h2 className="text-xl font-sora font-extrabold text-text-main capitalize">
                 {activeTab === 'browse' ? 'Browse Notes' : activeTab === 'forum' ? 'Community' : activeTab.replace('-', ' ')}

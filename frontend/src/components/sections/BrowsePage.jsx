@@ -6,14 +6,15 @@ import { supabase } from "../../lib/supabaseClient";
 import NotesList from "../NotesList";
 import EditNoteModal from "../EditNoteModal";
 
-const trendingTags = ["Computer Science", "Database Systems", "Discrete Math", "Quantum Physics", "Macroeconomics"];
+const trendingTags = ["Computer Science", "Database Systems", "Discrete Math", "Quantum Physics", "Macroeconomics", "English Literature"];
 
 const subjects = [
     { id: 'Computer Science', label: 'Computer Science' },
     { id: 'Mathematics', label: 'Mathematics' },
     { id: 'Physics', label: 'Physics' },
     { id: 'Business', label: 'Business & Econ' },
-    { id: 'Biology', label: 'Biology' }
+    { id: 'Biology', label: 'Biology' },
+    { id: 'English Literature', label: 'English Literature' }
 ];
 
 const fileTypes = [

@@ -301,6 +301,41 @@ export function generateCertificate({ userName, userEmail, courseName, category,
     drawDiamond(sX - 6, sY + 20, 1.2);
     drawDiamond(sX + 6, sY + 20, 1.2);
 
-    /* ── Save ───────────────────────────────────────────────────── */
-    doc.save("EduNest_Certificate_" + courseName.replace(/\s+/g, "_") + ".pdf");
+    /* ── Save / Return ─────────────────────────────────────────── */
+    return doc;
+}
+
+export async function generateAndUploadCertificate(args, supabase) {
+    const doc = generateCertificate(args);
+    const blob = doc.output("blob");
+    const fileName = `cert_${args.userId}_${args.assessmentId || 'standalone'}.pdf`;
+
+    const { data: uploadData, error: uploadErr } = await supabase.storage
+        .from('certificates')
+        .upload(fileName, blob, { upsert: true, contentType: 'application/pdf' });
+
+    if (uploadErr) throw uploadErr;
+
+    const { data: { publicUrl } } = supabase.storage
+        .from('certificates')
+        .getPublicUrl(fileName);
+
+    const { data: certRecord, error: dbErr } = await supabase
+        .from("certificates")
+        .upsert({
+            user_id: args.userId,
+            assessment_id: args.assessmentId,
+            course_id: args.courseId,
+            issued_name: args.userName,
+            certificate_url: publicUrl
+        })
+        .select()
+        .single();
+
+    if (dbErr) throw dbErr;
+    
+    // Also trigger download for user convenience
+    doc.save(`EduNest_Certificate_${args.courseName.replace(/\s+/g, "_")}.pdf`);
+    
+    return { record: certRecord, url: publicUrl };
 }

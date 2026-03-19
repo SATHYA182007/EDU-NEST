@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import { updateNote, deleteNote } from "../services/notesService";
 
-const subjects = ["Computer Science", "Physics", "Mathematics", "Biology", "Economics", "History"];
+const subjects = ["Computer Science", "Physics", "Mathematics", "Biology", "Economics", "History", "English Literature"];
 
 export default function EditNoteModal({ note, isOpen, onClose, onUpdate, onDelete }) {
     const [title, setTitle] = useState(note?.title || "");

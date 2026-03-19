@@ -79,8 +79,8 @@ export default function Sidebar({ activeTab, setActiveTab, user }) {
                 mass: 0.8
             }}
             className={cn(
-                "h-screen border-r border-border bg-surface flex flex-col p-4 sticky top-0 z-50 shrink-0 overflow-hidden transition-colors duration-200",
-                isHovered ? "shadow-[10px_0_30px_rgba(0,0,0,0.3)] bg-surface/95 backdrop-blur-xl" : "bg-surface"
+                "h-screen border-r border-border bg-surface flex flex-col p-4 sticky top-0 z-50 shrink-0 overflow-hidden transition-all duration-300",
+                isHovered ? "shadow-xl bg-surface/90 backdrop-blur-xl" : "shadow-sm bg-surface"
             )}
         >
             {/* Logo */}
@@ -177,15 +177,11 @@ export default function Sidebar({ activeTab, setActiveTab, user }) {
                                             )}
                                         </AnimatePresence>
 
-                                        {isActive && (
+                                         {isActive && (
                                             <motion.div 
                                                 layoutId="active-indicator"
                                                 className="absolute left-0 w-1 h-6 bg-primary rounded-r-full shadow-[2px_0_10px_rgba(79,142,247,0.5)]"
                                             />
-                                        )}
-                                        
-                                        {item.id === 'upload' && isHovered && (
-                                            <span className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
                                         )}
                                     </button>
                                 );
@@ -204,10 +200,14 @@ export default function Sidebar({ activeTab, setActiveTab, user }) {
                     <div className="flex items-center gap-3 cursor-pointer">
                         <motion.div 
                             whileHover={{ scale: 1.05 }}
-                            className="w-10 h-10 min-w-[40px] rounded-full bg-gradient-to-tr from-primary to-secondary p-[1px] shadow-lg shrink-0"
+                            className="w-10 h-10 min-w-[40px] rounded-full bg-gradient-to-tr from-primary to-secondary p-[1px] shadow-lg shrink-0 overflow-hidden"
                         >
-                            <div className="w-full h-full rounded-full bg-surface-2 border-2 border-surface flex items-center justify-center text-primary font-bold text-lg">
-                                {avatarLetter}
+                            <div className="w-full h-full rounded-full bg-surface-2 border-2 border-surface flex items-center justify-center text-primary font-bold text-lg overflow-hidden">
+                                {user?.user_metadata?.avatar_url ? (
+                                    <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    avatarLetter
+                                )}
                             </div>
                         </motion.div>
                         <AnimatePresence>
@@ -219,7 +219,7 @@ export default function Sidebar({ activeTab, setActiveTab, user }) {
                                     className="flex-1 overflow-hidden"
                                 >
                                     <p className="text-[13px] font-bold text-text-main truncate font-sora">{displayName}</p>
-                                    <p className="text-[11px] text-text-muted font-medium truncate">Computer Science</p>
+                                    <p className="text-[11px] text-text-muted font-medium truncate">{user?.user_metadata?.course || "Scholar"}</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>
