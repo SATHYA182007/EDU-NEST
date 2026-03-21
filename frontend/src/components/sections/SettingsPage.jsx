@@ -10,7 +10,17 @@ export default function SettingsPage({ user, onProfileUpdate, setUser }) {
     const [isSaving, setIsSaving] = useState(false);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [theme, setTheme] = useState(document.documentElement.classList.contains("light") ? "light" : "dark");
     const fileInputRef = useRef(null);
+    
+    // Theme effect
+    useEffect(() => {
+        if (theme === "light") {
+            document.documentElement.classList.add("light");
+        } else {
+            document.documentElement.classList.remove("light");
+        }
+    }, [theme]);
 
     // Profile State
     const [formData, setFormData] = useState({

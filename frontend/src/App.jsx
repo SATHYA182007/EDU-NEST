@@ -222,7 +222,14 @@ function App() {
 
   const renderContent = () => {
     if (authView && !user) {
-      return <AuthPage onAuthSuccess={() => setAuthView(false)} />
+      return (
+        <AuthPage 
+          onAuthSuccess={() => {
+            setAuthView(false);
+            setActiveTab(prev => prev === 'landing' ? 'dashboard' : prev);
+          }} 
+        />
+      );
     }
 
     switch (activeTab) {
