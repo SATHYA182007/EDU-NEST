@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UploadCloud, FileText, CheckCircle2, ChevronRight, X } from "lucide-react";
 import NoteCard from "./ui/NoteCard";
-import { uploadNote } from "../services/notesService";
+import { uploadFileToStorage, createNoteRecord } from "../services/notesService";
 
 const steps = ["Upload File", "Note Details", "Preview & Publish"];
 const subjects = ["Computer Science", "Physics", "Mathematics", "Biology", "Economics", "History", "English Literature"];
@@ -10,6 +10,9 @@ const subjects = ["Computer Science", "Physics", "Mathematics", "Biology", "Econ
 export default function UploadForm({ user }) {
     const [currentStep, setCurrentStep] = useState(1);
     const [isUploading, setIsUploading] = useState(false);
+    const [isUploadingToStorage, setIsUploadingToStorage] = useState(false);
+    const [storageError, setStorageError] = useState(null);
+    const [fileUrl, setFileUrl] = useState(null);
 
     // Form State
     const [file, setFile] = useState(null);
@@ -42,8 +45,24 @@ export default function UploadForm({ user }) {
         if (validTypes.includes(f.type) || ['pdf', 'docx', 'ppt', 'pptx'].includes(ext)) {
             setFile(f);
             if (!title) setTitle(f.name.replace(/\.[^/.]+$/, ""));
+            startBackgroundUpload(f);
         } else {
             alert("Only PDF, DOCX, or PPT files are allowed.");
+        }
+    };
+
+    const startBackgroundUpload = async (fileToUpload) => {
+        setIsUploadingToStorage(true);
+        setStorageError(null);
+        setFileUrl(null);
+        try {
+            const url = await uploadFileToStorage(fileToUpload);
+            setFileUrl(url);
+        } catch (error) {
+            console.error("Background upload failed:", error);
+            setStorageError(error.message);
+        } finally {
+            setIsUploadingToStorage(false);
         }
     };
 
@@ -68,6 +87,8 @@ export default function UploadForm({ user }) {
         setSemester("");
         setDescription("");
         setTags([]);
+        setFileUrl(null);
+        setStorageError(null);
         setCurrentStep(1);
     }
 
@@ -90,17 +111,26 @@ export default function UploadForm({ user }) {
     const handlePublish = async () => {
         if (!file || !title || !subject) return;
 
+        if (isUploadingToStorage) {
+            if (window.showToast) window.showToast("File is still uploading, please wait a moment...", 'info');
+            return;
+        }
+
+        if (storageError) {
+            if (window.showToast) window.showToast("File upload failed. Please try replacing the file.", 'error');
+            return;
+        }
+
         setIsUploading(true);
-        if (window.showToast) window.showToast("Uploading notice, please wait...", 'info');
 
         try {
-            await uploadNote({
-                file,
+            await createNoteRecord({
                 title,
                 subject,
                 description,
                 semester,
-                userId: user?.id
+                userId: user?.id,
+                fileUrl
             });
 
             if (window.showToast) window.showToast("Note Published Successfully!", 'success');
@@ -172,11 +202,19 @@ export default function UploadForm({ user }) {
                                 <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.doc,.docx,.ppt,.pptx" />
                                 {file ? (
                                     <>
-                                        <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mb-4 text-success">
-                                            <FileText className="w-8 h-8" />
+                                        <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isUploadingToStorage ? 'bg-primary/20 text-primary' : storageError ? 'bg-danger/20 text-danger' : 'bg-success/20 text-success'}`}>
+                                            {isUploadingToStorage ? (
+                                                <div className="w-8 h-8 border-4 border-current rounded-full animate-spin border-t-transparent" />
+                                            ) : storageError ? (
+                                                <X className="w-8 h-8" />
+                                            ) : (
+                                                <FileText className="w-8 h-8" />
+                                            )}
                                         </div>
                                         <p className="font-bold text-lg text-text-main mb-1">{file.name}</p>
-                                        <p className="text-sm text-text-muted">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                        <p className={`text-sm ${isUploadingToStorage ? 'text-primary font-semibold' : storageError ? 'text-danger font-semibold' : 'text-success font-semibold'}`}>
+                                            {isUploadingToStorage ? "100% Uploading to Cloud..." : storageError ? "Upload Failed" : "Upload Complete"} • {(file.size / 1024 / 1024).toFixed(2)} MB
+                                        </p>
                                         <button className="mt-4 text-sm text-primary hover:underline font-semibold" onClick={(e) => { e.stopPropagation(); setFile(null); }}>Remove and select another</button>
                                     </>
                                 ) : (
@@ -242,9 +280,9 @@ export default function UploadForm({ user }) {
                     ) : (
                         <div className="flex gap-3">
                             <button className="btn btn-ghost hover:bg-warning/10 hover:border-warning/30 hover:text-warning" disabled={isUploading} onClick={() => { window.showToast && window.showToast("Saved as Draft", 'success'); resetForm(); }}>Save Draft</button>
-                            <button className="btn btn-primary shadow-[0_0_15px_rgba(45,212,160,0.4)] bg-success hover:bg-emerald-500 flex gap-2 items-center" disabled={isUploading} onClick={handlePublish}>
-                                {isUploading && <div className="w-4 h-4 border-2 border-white rounded-full animate-spin border-t-transparent" />}
-                                {isUploading ? "Publishing..." : "Publish Note"}
+                            <button className="btn btn-primary shadow-[0_0_15px_rgba(45,212,160,0.4)] bg-success hover:bg-emerald-500 flex gap-2 items-center" disabled={isUploading || isUploadingToStorage} onClick={handlePublish}>
+                                {(isUploading || isUploadingToStorage) && <div className="w-4 h-4 border-2 border-white rounded-full animate-spin border-t-transparent" />}
+                                {isUploadingToStorage ? "Finishing Upload..." : isUploading ? "Publishing..." : "Publish Note"}
                             </button>
                         </div>
                     )}

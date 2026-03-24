@@ -97,9 +97,9 @@ export const handleDownload = async (fileUrl, noteId, fileName) => {
 };
 
 /**
- * Uploads a note file to storage and metadata to the database.
+ * Uploads a note file to storage and returns the public URL.
  */
-export const uploadNote = async ({ file, title, subject, description, semester, userId }) => {
+export const uploadFileToStorage = async (file) => {
     try {
         if (!file) throw new Error("No file selected.");
 
@@ -119,8 +119,17 @@ export const uploadNote = async ({ file, title, subject, description, semester, 
             .from('notes-files')
             .getPublicUrl(filePath);
 
-        const fileUrl = publicUrlData.publicUrl;
+        return publicUrlData.publicUrl;
+    } catch (error) {
+        throw error;
+    }
+};
 
+/**
+ * Creates note metadata record in the database.
+ */
+export const createNoteRecord = async ({ title, subject, description, semester, userId, fileUrl }) => {
+    try {
         const { data, error: dbError } = await supabase
             .from('notes')
             .insert([
@@ -145,6 +154,14 @@ export const uploadNote = async ({ file, title, subject, description, semester, 
     } catch (error) {
         throw error;
     }
+};
+
+/**
+ * Uploads a note file to storage and metadata to the database (legacy support).
+ */
+export const uploadNote = async ({ file, title, subject, description, semester, userId }) => {
+    const fileUrl = await uploadFileToStorage(file);
+    return await createNoteRecord({ title, subject, description, semester, userId, fileUrl });
 };
 
 /**
