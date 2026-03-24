@@ -238,21 +238,22 @@ export const rateNote = async (userId, noteId, ratingValue) => {
 
     if (error) throw new Error(`Failed to rate note: ${error.message}`);
 
-    // 2. Update average rating in notes table
+    // 2. Compute new average and update notes table
     const { data: ratingsData } = await supabase
         .from('ratings')
         .select('rating_value')
         .eq('note_id', noteId);
 
+    let newAvg = ratingValue;
     if (ratingsData && ratingsData.length > 0) {
-        const avg = ratingsData.reduce((acc, curr) => acc + curr.rating_value, 0) / ratingsData.length;
+        newAvg = ratingsData.reduce((acc, curr) => acc + curr.rating_value, 0) / ratingsData.length;
         await supabase
             .from('notes')
-            .update({ rating: avg })
+            .update({ rating: newAvg })
             .eq('id', noteId);
     }
 
-    return true;
+    return newAvg;
 };
 
 /**

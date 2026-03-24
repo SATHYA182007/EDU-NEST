@@ -92,8 +92,10 @@ export default function NoteCard({ note, userId, onEdit }) {
                         {note.subject || "General"}
                     </span>
                     <div className="flex items-center gap-1.5 bg-surface-2 px-2 py-1 rounded-lg border border-border">
-                        <Star className="w-3 h-3 text-warning fill-warning" />
-                        <span className="text-[10px] font-black text-text-main">{rating || "4.5"}</span>
+                        <Star className={`w-3 h-3 ${rating > 0 ? "text-warning fill-warning" : "text-border"}`} />
+                        <span className="text-[10px] font-black text-text-main">
+                            {rating > 0 ? parseFloat(rating).toFixed(1) : "New"}
+                        </span>
                     </div>
                 </div>
 

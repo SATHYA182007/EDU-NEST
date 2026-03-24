@@ -5,6 +5,7 @@ import { getNotes, handleDownload } from "../../services/notesService";
 import { supabase } from "../../lib/supabaseClient";
 import NotesList from "../NotesList";
 import EditNoteModal from "../EditNoteModal";
+import RatingModal from "../ui/RatingModal";
 
 const trendingTags = ["Computer Science", "Database Systems", "Discrete Math", "Quantum Physics", "Macroeconomics", "English Literature"];
 
@@ -45,6 +46,7 @@ export default function BrowsePage({ user }) {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedSemesters, setSelectedSemesters] = useState([]);
     const [editingNote, setEditingNote] = useState(null);
+    const [ratingNote, setRatingNote] = useState(null);
 
     useEffect(() => {
         fetchNotes();
@@ -134,17 +136,27 @@ export default function BrowsePage({ user }) {
         try {
             if (window.showToast) window.showToast("Starting download...", "info");
             
-            // Extract the original extension from the file_url
             const urlParts = note.file_url.split('.');
             const extension = urlParts.length > 1 ? urlParts.pop() : 'pdf';
             const fileName = `${note.title || 'note'}.${extension}`;
             
             await handleDownload(note.file_url, note.id, fileName);
-            if (window.showToast) window.showToast("Download started!", "success");
+            if (window.showToast) window.showToast("Download complete!", "success");
+
+            // Prompt user to rate after download
+            setRatingNote(note);
         } catch (error) {
             console.error("Download failed:", error);
             if (window.showToast) window.showToast("Download failed", "error");
         }
+    };
+
+    // Update the note's rating in local state after user submits a rating
+    const handleRated = (noteId, newAvgRating) => {
+        if (newAvgRating === undefined) return;
+        setNotes(prev =>
+            prev.map(n => n.id === noteId ? { ...n, rating: newAvgRating } : n)
+        );
     };
     
     const handleEditNote = (note) => {
@@ -337,6 +349,14 @@ export default function BrowsePage({ user }) {
                         onClose={() => setEditingNote(null)} 
                         onUpdate={handleNoteUpdated}
                         onDelete={handleNoteDeleted}
+                    />
+
+                    <RatingModal
+                        isOpen={!!ratingNote}
+                        note={ratingNote}
+                        userId={user?.id}
+                        onClose={() => setRatingNote(null)}
+                        onRated={handleRated}
                     />
 
                     {/* Empty State */}
