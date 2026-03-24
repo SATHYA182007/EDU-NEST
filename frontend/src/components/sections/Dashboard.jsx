@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { FileUp, Download, Eye, Flame, Activity, Calendar, CheckSquare, Clock, Users, BookOpen, Star, Trophy } from "lucide-react";
+import { FileUp, Download, Users, Flame, Activity, Calendar, CheckSquare, Clock, BookOpen, Star, Trophy } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from "../../lib/utils";
 import NoteCard from "../ui/NoteCard";
@@ -146,7 +146,7 @@ const ActivityChart = ({ data = [0, 0, 0, 0, 0, 0, 0] }) => {
 };
 
 export default function Dashboard({ user }) {
-    const [stats, setStats] = useState({ downloads: 0, uploads: 0, views: 0, streak: 0 });
+    const [stats, setStats] = useState({ downloads: 0, uploads: 0, members: 0, activeCourseCount: 0 });
     const [recentNotes, setRecentNotes] = useState([]);
     const [uploadActivity, setUploadActivity] = useState([0, 0, 0, 0, 0, 0, 0]);
     const [loading, setLoading] = useState(true);
@@ -155,6 +155,21 @@ export default function Dashboard({ user }) {
     const [plannerItems, setPlannerItems] = useState([]);
     const [mastery, setMastery] = useState(0);
     const [communityData, setCommunityData] = useState({ users: 0, resources: 0 });
+
+    // Real-time subscription: update member count when new notes are added
+    useEffect(() => {
+        const channel = supabase
+            .channel('dashboard:notes:members')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notes' }, async () => {
+                const { data } = await supabase.from('notes').select('user_id');
+                if (data) {
+                    const uniqueMembers = new Set(data.map(n => n.user_id).filter(Boolean)).size;
+                    setStats(prev => ({ ...prev, members: uniqueMembers > 0 ? uniqueMembers : 1 }));
+                }
+            })
+            .subscribe();
+        return () => supabase.removeChannel(channel);
+    }, []);
 
     const onDownloadNote = async (note) => {
         try {
@@ -302,8 +317,8 @@ export default function Dashboard({ user }) {
                     ...prev, 
                     uploads: totalUploads, 
                     downloads: totalDownloads,
-                    views: totalCompletedLessons,
-                    streak: activeCoursesCount
+                    members: uniqueUsers > 0 ? uniqueUsers : 1,
+                    activeCourseCount: activeCoursesCount
                 }));
 
                 // Sort by most recently interacted or highest progress (we'll just sort by pct desc)
@@ -342,8 +357,8 @@ export default function Dashboard({ user }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard icon={FileUp} label="Total Uploads" value={stats.uploads} delay={0.1} />
                     <StatCard icon={Download} label="Total Downloads" value={stats.downloads} delay={0.2} />
-                    <StatCard icon={BookOpen} label="Lessons Done" value={stats.views} delay={0.3} />
-                    <StatCard icon={Activity} label="Active Courses" value={stats.streak} delay={0.4} />
+                    <StatCard icon={Users} label="Active Members" value={stats.members} delay={0.3} />
+                    <StatCard icon={Activity} label="Active Courses" value={stats.activeCourseCount} delay={0.4} />
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
