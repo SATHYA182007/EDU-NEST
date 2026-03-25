@@ -655,6 +655,29 @@ export default function CoursesPage({ user }) {
     const [readerOpen, setReaderOpen] = useState(false);
     const [startLessonIdx, setStartLessonIdx] = useState(0);
     const [progress, setProgress] = useState(() => loadProgress());
+    // Set of course IDs/titles where the user has passed the final assessment
+    const [passedAssessments, setPassedAssessments] = useState(new Set());
+
+    // Fetch which assessments the user has actually passed (≥80%)
+    useEffect(() => {
+        if (!user) return;
+        supabase
+            .from('user_assessment_attempts')
+            .select('assessment_id, is_passed, assessments(title, course_id)')
+            .eq('user_id', user.id)
+            .eq('is_passed', true)
+            .then(({ data }) => {
+                if (data) {
+                    const passed = new Set();
+                    data.forEach(row => {
+                        // Store both assessment course_id and title for flexible matching
+                        if (row.assessments?.course_id) passed.add(String(row.assessments.course_id));
+                        if (row.assessments?.title) passed.add(row.assessments.title.toLowerCase());
+                    });
+                    setPassedAssessments(passed);
+                }
+            });
+    }, [user]);
 
     const category = COURSES_DATA.find(c => c.id === activeCategory) || COURSES_DATA[0];
 
@@ -670,6 +693,12 @@ export default function CoursesPage({ user }) {
     const getCourseProgress = (catId, courseId) => {
         const key = catId + "_" + courseId;
         return Object.values(progress[key] || {}).filter(Boolean).length;
+    };
+
+    // Returns true only if the user passed the final assessment for this course
+    const isCourseAssessmentPassed = (course) => {
+        return passedAssessments.has(String(course.id)) ||
+               passedAssessments.has(course.title.toLowerCase());
     };
 
     // ── Lesson Reader (full screen) ──────────────────────────────────────────
@@ -768,7 +797,10 @@ export default function CoursesPage({ user }) {
                             const done = getCourseProgress(category.id, course.id);
                             const pct = Math.round((done / course.lessons.length) * 100);
                             const started = done > 0;
-                            const finished = pct === 100;
+                            const lessonsFinished = pct === 100;
+                            const assessmentPassed = isCourseAssessmentPassed(course);
+                            // True completion = all lessons done AND assessment passed
+                            const fullyPassed = lessonsFinished && assessmentPassed;
                             return (
                                 <motion.div key={course.id}
                                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
@@ -779,7 +811,12 @@ export default function CoursesPage({ user }) {
                                     <div className="p-6 flex-1 flex flex-col">
                                         <div className="flex items-start justify-between gap-2 mb-4">
                                             <span className={cn("text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border", LEVEL_COLOR[course.level])}>{course.level}</span>
-                                            {finished && <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-green-400/10 border border-green-400/20 text-green-400">PASSED ✓</span>}
+                                            {fullyPassed && (
+                                                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-green-400/10 border border-green-400/20 text-green-400">PASSED ✓</span>
+                                            )}
+                                            {lessonsFinished && !assessmentPassed && (
+                                                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400">IN REVIEW</span>
+                                            )}
                                         </div>
                                         
                                         <h3 className="text-xl font-sora font-extrabold text-text-main mb-2 transition-colors group-hover:text-primary leading-tight">{course.title}</h3>
@@ -805,9 +842,10 @@ export default function CoursesPage({ user }) {
                                             style={started
                                                 ? { background: 'var(--color-surface-2)', color: 'var(--color-text-main)', border: `1px solid var(--color-border)` }
                                                 : { background: category.color, color: "#fff", boxShadow: `0 8px 20px ${category.color}40` }}>
-                                            {finished ? <><CheckCircle2 className="w-4 h-4" /> Review Path</> :
-                                             started   ? <><Play className="w-4 h-4" /> Resume Now</> :
-                                                         <><Play className="w-4 h-4" /> Begin Path</>}
+                                            {fullyPassed  ? <><CheckCircle2 className="w-4 h-4" /> Review Path</> :
+                                             lessonsFinished ? <><Award className="w-4 h-4" /> Take Assessment</> :
+                                             started        ? <><Play className="w-4 h-4" /> Resume Now</> :
+                                                             <><Play className="w-4 h-4" /> Begin Path</>}
                                         </button>
                                     </div>
                                 </motion.div>
